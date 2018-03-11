@@ -1,5 +1,4 @@
 from tensorflow.examples.tutorials.mnist import input_data
-from sklearn.linear_model import LogisticRegression as LR
 import numpy as np
 import tensorflow as tf
 
@@ -12,7 +11,6 @@ def fc_net(X, dims, training):
     return X
 
 def main():
-    epsilon = .007
     mnist = input_data.read_data_sets('MNIST_DATA', one_hot=True)
     X = tf.placeholder(tf.float32, [None, 784])
     is_training = tf.placeholder(tf.bool)
