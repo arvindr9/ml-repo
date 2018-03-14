@@ -16,10 +16,10 @@ epsilon = .0013
 #
 def find_adv(X, clf, sign):
     T_X = clf.predict_proba(X)
-    fun = lambda x: sign * (x - T_X)
+    fun = lambda x: sign * (clf.predict_proba(x) - T_X)
     cons = ({'type': 'ineq',
-            'fun': lambda x: (x-X)**2})
-    obj = scipy.optimize.minimize(fun, X.shape, method='COBYLA', constraints = cons)
+            'fun': lambda x: (x-X)**2 - epsilon})
+    obj = scipy.optimize.minimize(fun, X, method='COBYLA', constraints = cons).x
     return obj
 
 def adversarialize(X, clf, sign = -1):
@@ -49,8 +49,8 @@ def main():
     print(X_train.shape)
     clf = createRandomForest(X_train, y_train)
     X_train_adv = adversarialize(X_train, clf)
-    print(X_train[:7][:7])
     print(X_train_adv[:7][:7])
+
 
 if __name__ == '__main__':
     main()
