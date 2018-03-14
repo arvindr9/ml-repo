@@ -14,26 +14,25 @@ epsilon = .0013
 #     find X + e such that |e| <= epsilon and fun is minimal
 #     append X + e to adversarial list
 #
-def find_adv(X, clf):
+def find_adv(X, clf, sign):
     T_X = clf.predict_proba(X)
-    fun = lambda e: clf.predict_proba(X + e) - T_X
+    fun = lambda x: sign * (x - T_X)
     cons = ({'type': 'ineq',
-            'fun': fun})
-    X_adv = scipy.optimize.minimize(fun, X.shape, method='COBYLA', constraints = cons)
-    return X_adv
+            'fun': lambda x: (x-X)**2})
+    obj = scipy.optimize.minimize(fun, X.shape, method='COBYLA', constraints = cons)
+    return obj
 
 def adversarialize(X, clf, sign = -1):
     j = 0
-    X = X * sign
     X_adv = []
     for i in range(X.shape[0]):
         if j == 0:
-            arr = find_adv(X[0].reshape(1, -1), clf)
+            arr = find_adv(X[0].reshape(1, -1), clf, sign)
             j += 1
             continue
-        Xi_adv = find_adv(X[i].reshape(1, -1), clf)
+        Xi_adv = find_adv(X[i].reshape(1, -1), clf, sign)
         X_adv = np.concatenate((X_adv, Xi_adv))
-    return sign * X_adv
+    return X_adv
 
 def createRandomForest(X, y):
     clf = RFC(max_depth=65)
