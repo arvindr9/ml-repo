@@ -4,6 +4,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 from sklearn.ensemble import RandomForestClassifier as RFC
 import numpy as np
 import scipy
+count = .10
 epsilon = .0013
 #fun = L_2(T(x + e) - T(x))
 #X_adv = scipy.optimize.minimize(fun, 784, method=COBYLA, constraints = cons)
@@ -16,10 +17,14 @@ epsilon = .0013
 #
 def find_adv(X, clf, sign):
     T_X = clf.predict_proba(X)
-    fun = lambda x: sign * (clf.predict_proba(x) - T_X)
+    #X = X.reshape(-1, 1)
+    fun = lambda x: sign * np.sum((clf.predict_proba(x) - T_X)**2)
     cons = ({'type': 'ineq',
-            'fun': lambda x: (x-X)**2 - epsilon})
-    obj = scipy.optimize.minimize(fun, X, method='COBYLA', constraints = cons).x
+            'fun': lambda x: (x-X)**2 - epsilon**2})
+    print(count)
+    print(X.shape)
+    print(X)
+    obj = scipy.optimize.minimize(fun, X, method='COBYLA', constraints = cons)
     return obj
 
 def adversarialize(X, clf, sign = -1):
@@ -27,7 +32,7 @@ def adversarialize(X, clf, sign = -1):
     X_adv = []
     for i in range(X.shape[0]):
         if j == 0:
-            arr = find_adv(X[0].reshape(1, -1), clf, sign)
+            X_adv = find_adv(X[0].reshape(1, -1), clf, sign)
             j += 1
             continue
         Xi_adv = find_adv(X[i].reshape(1, -1), clf, sign)
@@ -49,7 +54,6 @@ def main():
     print(X_train.shape)
     clf = createRandomForest(X_train, y_train)
     X_train_adv = adversarialize(X_train, clf)
-    print(X_train_adv[1].shape)
 
 
 if __name__ == '__main__':
