@@ -15,18 +15,28 @@ epsilon = .0013
 #     find X + e such that |e| <= epsilon and fun is minimal
 #     append X + e to adversarial list
 #
+
 def find_adv(X, clf, sign):
     T_X = clf.predict_proba(X)
     #X = X.reshape(-1, 1)
-    fun = lambda x: sign * np.sum((clf.predict_proba(x) - T_X)**2)
+    fun = lambda x: sign * np.sum((clf.predict_proba(np.array(x).reshape(1, -1)) - T_X)**2)
     cons = ({'type': 'ineq',
-            'fun': lambda x: (x-X)**2 - epsilon**2})
+            'fun': lambda x: np.sum(epsilon**2 - (np.array(x).reshape(1, -1)- X)**2)})
     print(count)
     print(X.shape)
-    print(X)
-    obj = scipy.optimize.minimize(fun, X, method='COBYLA', constraints = cons)
+    obj = scipy.optimize.minimize(fun, list(X[0]), method='COBYLA', constraints = cons)
     return obj
 
+def find_adv2(X, clf, sign):
+    T_X = clf.predict_proba(X)
+    #X = X.reshape(-1, 1)
+    fun = lambda x: sign * np.sum((clf.predict_proba(x.reshape(1, -1)) - T_X)**2)
+    cons = ({'type': 'ineq',
+            'fun': lambda x: np.sum(epsilon**2 - (x.reshape(1, -1)- X)**2)})
+    print(count)
+    print(X.shape)
+    obj = scipy.optimize.minimize(fun, X[0], method='COBYLA', constraints = cons)
+    return obj
 def adversarialize(X, clf, sign = -1):
     j = 0
     X_adv = []
