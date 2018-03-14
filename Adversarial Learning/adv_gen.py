@@ -49,7 +49,7 @@ def main():
     print(X_train.shape)
     clf = createRandomForest(X_train, y_train)
     X_train_adv = adversarialize(X_train, clf)
-    print(X_train_adv[:7][:7])
+    print(X_train_adv[1].shape)
 
 
 if __name__ == '__main__':
